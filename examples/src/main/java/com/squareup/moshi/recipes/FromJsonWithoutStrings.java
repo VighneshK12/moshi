@@ -16,15 +16,13 @@
 package com.squareup.moshi.recipes;
 
 import com.squareup.moshi.FromJson;
+import com.squareup.moshi.Json;        // ⬅️ add this
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.ToJson;
 
 public final class FromJsonWithoutStrings {
   public void run() throws Exception {
-    // For some reason our JSON has date and time as separate fields. We will clean that up during
-    // parsing: Moshi will first parse the JSON directly to an EventJson and from that the
-    // EventJsonAdapter will create the actual Event.
     String json =
         ""
             + "{\n"
@@ -47,23 +45,23 @@ public final class FromJsonWithoutStrings {
 
   private static final class EventJson {
     String title;
-    String begin_date;
-    String begin_time;
+
+    // ⬇️ renamed to camelCase, keep original JSON keys via @Json
+    @Json(name = "begin_date")
+    String beginDate;
+
+    @Json(name = "begin_time")
+    String beginTime;
   }
 
   public static final class Event {
     String title;
     String beginDateAndTime;
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
       return "Event{"
-          + "title='"
-          + title
-          + '\''
-          + ", beginDateAndTime='"
-          + beginDateAndTime
-          + '\''
+          + "title='" + title + '\''
+          + ", beginDateAndTime='" + beginDateAndTime + '\''
           + '}';
     }
   }
@@ -73,7 +71,7 @@ public final class FromJsonWithoutStrings {
     Event eventFromJson(EventJson eventJson) {
       Event event = new Event();
       event.title = eventJson.title;
-      event.beginDateAndTime = eventJson.begin_date + " " + eventJson.begin_time;
+      event.beginDateAndTime = eventJson.beginDate + " " + eventJson.beginTime; // ⬅️ updated
       return event;
     }
 
@@ -81,8 +79,8 @@ public final class FromJsonWithoutStrings {
     EventJson eventToJson(Event event) {
       EventJson json = new EventJson();
       json.title = event.title;
-      json.begin_date = event.beginDateAndTime.substring(0, 8);
-      json.begin_time = event.beginDateAndTime.substring(9, 14);
+      json.beginDate = event.beginDateAndTime.substring(0, 8);   // ⬅️ updated
+      json.beginTime = event.beginDateAndTime.substring(9, 14);  // ⬅️ updated
       return json;
     }
   }
